@@ -1,4 +1,4 @@
-package optionhub_lib
+package users
 
 // Регистрация атрибута в соответствии с ID атрибута
 const (
@@ -23,6 +23,14 @@ const (
 	AttributeType_Date    = AttributeType("date")
 	AttributeType_Unknown = AttributeType("unknown")
 )
+
+var AttributeTypes = map[int]AttributeType{
+	Attribute_Name:     AttributeType_String,
+	Attribute_Surname:  AttributeType_String,
+	Attribute_Telegram: AttributeType_String,
+	Attribute_Git:      AttributeType_String,
+	Attribute_City:     AttributeType_Int,
+}
 
 func AttributeTypeByValue(attribute int64) AttributeType {
 	switch attribute {

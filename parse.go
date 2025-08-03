@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/s21platform/optionhub-lib/users"
 	"time"
 
 	logger_lib "github.com/s21platform/logger-lib"
@@ -31,29 +32,29 @@ func (op *OptionhubParser) ParseAttributes(data json.RawMessage) ([]AttributeVal
 func (op *OptionhubParser) parseAttributeValues(data map[int64]json.RawMessage) ([]AttributeValue, error) {
 	var res []AttributeValue
 	for k, v := range data {
-		switch AttributeTypeByValue(k) {
-		case AttributeType_Int:
+		switch users.AttributeTypeByValue(k) {
+		case users.AttributeType_Int:
 			val, err := op.parseInt(k, v)
 			if err != nil {
 				op.logger.Error(fmt.Sprintf("failed to parse `int` value: %v", err))
 				continue
 			}
 			res = append(res, val)
-		case AttributeType_String:
+		case users.AttributeType_String:
 			val, err := op.parseString(k, v)
 			if err != nil {
 				op.logger.Error(fmt.Sprintf("failed to parse `string` value: %v", err))
 				continue
 			}
 			res = append(res, val)
-		case AttributeType_IntEnum:
+		case users.AttributeType_IntEnum:
 			val, err := op.parseIntEnum(k, v)
 			if err != nil {
 				op.logger.Error(fmt.Sprintf("failed to parse `int enum` value: %v", err))
 				continue
 			}
 			res = append(res, val)
-		case AttributeType_Date:
+		case users.AttributeType_Date:
 			val, err := op.parseDate(k, v)
 			if err != nil {
 				op.logger.Error(fmt.Sprintf("failed to parse `date` value: %v", err))
