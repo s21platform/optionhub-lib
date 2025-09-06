@@ -2,16 +2,16 @@ package users
 
 // Регистрация атрибута в соответствии с ID атрибута
 const (
-	Attribute_Name      = 1
-	Attribute_Surname   = 2
-	Attribute_Patronym  = 3
-	Attribute_Age       = 4
-	Attribute_City      = 5
-	Attribute_OS        = 6
-	Attribute_Hobby     = 7
-	Attribute_Birthdate = 8
-	Attribute_Telegram  = 9
-	Attribute_Git       = 10
+	Attribute_Nickanme_1 = 1
+	Attribute_Name_2     = 2
+	Attribute_Surname_3  = 3
+	Attribute_Age        = 4
+	Attribute_City       = 5
+	Attribute_OS         = 6
+	Attribute_Hobby      = 7
+	Attribute_Birthdate  = 8
+	Attribute_Telegram   = 9
+	Attribute_Git        = 10
 )
 
 type AttributeType string
@@ -25,18 +25,17 @@ const (
 )
 
 var AttributeTypes = map[int]AttributeType{
-	Attribute_Name:     AttributeType_String,
-	Attribute_Surname:  AttributeType_String,
-	Attribute_Telegram: AttributeType_String,
-	Attribute_Git:      AttributeType_String,
-	Attribute_City:     AttributeType_Int,
+	Attribute_Name_2:    AttributeType_String,
+	Attribute_Surname_3: AttributeType_String,
+	Attribute_Telegram:  AttributeType_String,
+	Attribute_Git:       AttributeType_String,
+	Attribute_City:      AttributeType_Int,
 }
 
 func AttributeTypeByValue(attribute int64) AttributeType {
 	switch attribute {
-	case Attribute_Name,
-		Attribute_Surname,
-		Attribute_Patronym,
+	case Attribute_Name_2,
+		Attribute_Surname_3,
 		Attribute_Telegram,
 		Attribute_Git:
 		return AttributeType_String
