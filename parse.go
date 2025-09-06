@@ -12,65 +12,55 @@ import (
 	"github.com/s21platform/optionhub-lib/users"
 )
 
-type OptionhubParser struct {
-	logger logger_lib.LoggerInterface
-}
-
-func New(logger logger_lib.LoggerInterface) *OptionhubParser {
-	return &OptionhubParser{
-		logger: logger,
-	}
-}
-
-func (op *OptionhubParser) ParseAttributes(ctx context.Context, data json.RawMessage) ([]AttributeValue, error) {
+func ParseAttributes(ctx context.Context, data json.RawMessage) ([]AttributeValue, error) {
 	var target map[int64]json.RawMessage
 	err := json.Unmarshal(data, &target)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal origin bytes: %v", err)
 	}
-	return op.parseAttributeValues(ctx, target)
+	return parseAttributeValues(ctx, target)
 }
 
-func (op *OptionhubParser) parseAttributeValues(ctx context.Context, data map[int64]json.RawMessage) ([]AttributeValue, error) {
+func parseAttributeValues(ctx context.Context, data map[int64]json.RawMessage) ([]AttributeValue, error) {
 	var res []AttributeValue
 	for k, v := range data {
 		switch users.AttributeTypeByValue(k) {
 		case users.AttributeType_Int:
-			val, err := op.parseInt(k, v)
+			val, err := parseInt(k, v)
 			if err != nil {
-				op.logger.Error(logger_lib.WithField(ctx, "error", err.Error()), "failed to parse `int` value")
+				logger_lib.Error(logger_lib.WithField(ctx, "error", err.Error()), "failed to parse `int` value")
 				continue
 			}
 			res = append(res, val)
 		case users.AttributeType_String:
-			val, err := op.parseString(k, v)
+			val, err := parseString(k, v)
 			if err != nil {
-				op.logger.Error(logger_lib.WithField(ctx, "error", err.Error()), "failed to parse `string` value")
+				logger_lib.Error(logger_lib.WithField(ctx, "error", err.Error()), "failed to parse `string` value")
 				continue
 			}
 			res = append(res, val)
 		case users.AttributeType_IntEnum:
-			val, err := op.parseIntEnum(k, v)
+			val, err := parseIntEnum(k, v)
 			if err != nil {
-				op.logger.Error(logger_lib.WithField(ctx, "error", err.Error()), "failed to parse `int enum` value")
+				logger_lib.Error(logger_lib.WithField(ctx, "error", err.Error()), "failed to parse `int enum` value")
 				continue
 			}
 			res = append(res, val)
 		case users.AttributeType_Date:
-			val, err := op.parseDate(k, v)
+			val, err := parseDate(k, v)
 			if err != nil {
-				op.logger.Error(logger_lib.WithField(ctx, "error", err.Error()), "failed to parse `date` value")
+				logger_lib.Error(logger_lib.WithField(ctx, "error", err.Error()), "failed to parse `date` value")
 				continue
 			}
 			res = append(res, val)
 		default:
-			op.logger.Error(ctx, fmt.Sprintf("failed to retrieve `unknown` value for attribute_id: %d", k))
+			logger_lib.Error(ctx, fmt.Sprintf("failed to retrieve `unknown` value for attribute_id: %d", k))
 		}
 	}
 	return res, nil
 }
 
-func (op *OptionhubParser) parseInt(attributeId int64, data json.RawMessage) (AttributeValue, error) {
+func parseInt(attributeId int64, data json.RawMessage) (AttributeValue, error) {
 	bytes.Replace(data, []byte(`"`), []byte{}, -1)
 	var result int64
 	err := json.Unmarshal(data, &result)
@@ -83,7 +73,7 @@ func (op *OptionhubParser) parseInt(attributeId int64, data json.RawMessage) (At
 	}, nil
 }
 
-func (op *OptionhubParser) parseString(attributeId int64, data json.RawMessage) (AttributeValue, error) {
+func parseString(attributeId int64, data json.RawMessage) (AttributeValue, error) {
 	var result string
 	err := json.Unmarshal(data, &result)
 	if err != nil {
@@ -95,7 +85,7 @@ func (op *OptionhubParser) parseString(attributeId int64, data json.RawMessage) 
 	}, nil
 }
 
-func (op *OptionhubParser) parseIntEnum(attributeId int64, data json.RawMessage) (AttributeValue, error) {
+func parseIntEnum(attributeId int64, data json.RawMessage) (AttributeValue, error) {
 	result := []int64{}
 	err := json.Unmarshal(data, &result)
 	if err != nil {
@@ -107,7 +97,7 @@ func (op *OptionhubParser) parseIntEnum(attributeId int64, data json.RawMessage)
 	}, nil
 }
 
-func (op *OptionhubParser) parseDate(attributeId int64, data json.RawMessage) (AttributeValue, error) {
+func parseDate(attributeId int64, data json.RawMessage) (AttributeValue, error) {
 	result := time.Time{}
 	err := json.Unmarshal(data, &result)
 	if err != nil {
