@@ -2,12 +2,14 @@ package optionhub_lib
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/s21platform/optionhub-lib/users"
 	"time"
 
 	logger_lib "github.com/s21platform/logger-lib"
+
+	"github.com/s21platform/optionhub-lib/users"
 )
 
 type OptionhubParser struct {
@@ -20,49 +22,49 @@ func New(logger logger_lib.LoggerInterface) *OptionhubParser {
 	}
 }
 
-func (op *OptionhubParser) ParseAttributes(data json.RawMessage) ([]AttributeValue, error) {
+func (op *OptionhubParser) ParseAttributes(ctx context.Context, data json.RawMessage) ([]AttributeValue, error) {
 	var target map[int64]json.RawMessage
 	err := json.Unmarshal(data, &target)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal origin bytes: %v", err)
 	}
-	return op.parseAttributeValues(target)
+	return op.parseAttributeValues(ctx, target)
 }
 
-func (op *OptionhubParser) parseAttributeValues(data map[int64]json.RawMessage) ([]AttributeValue, error) {
+func (op *OptionhubParser) parseAttributeValues(ctx context.Context, data map[int64]json.RawMessage) ([]AttributeValue, error) {
 	var res []AttributeValue
 	for k, v := range data {
 		switch users.AttributeTypeByValue(k) {
 		case users.AttributeType_Int:
 			val, err := op.parseInt(k, v)
 			if err != nil {
-				op.logger.Error(fmt.Sprintf("failed to parse `int` value: %v", err))
+				op.logger.Error(logger_lib.WithField(ctx, "error", err.Error()), "failed to parse `int` value")
 				continue
 			}
 			res = append(res, val)
 		case users.AttributeType_String:
 			val, err := op.parseString(k, v)
 			if err != nil {
-				op.logger.Error(fmt.Sprintf("failed to parse `string` value: %v", err))
+				op.logger.Error(logger_lib.WithField(ctx, "error", err.Error()), "failed to parse `string` value")
 				continue
 			}
 			res = append(res, val)
 		case users.AttributeType_IntEnum:
 			val, err := op.parseIntEnum(k, v)
 			if err != nil {
-				op.logger.Error(fmt.Sprintf("failed to parse `int enum` value: %v", err))
+				op.logger.Error(logger_lib.WithField(ctx, "error", err.Error()), "failed to parse `int enum` value")
 				continue
 			}
 			res = append(res, val)
 		case users.AttributeType_Date:
 			val, err := op.parseDate(k, v)
 			if err != nil {
-				op.logger.Error(fmt.Sprintf("failed to parse `date` value: %v", err))
+				op.logger.Error(logger_lib.WithField(ctx, "error", err.Error()), "failed to parse `date` value")
 				continue
 			}
 			res = append(res, val)
 		default:
-			op.logger.Error(fmt.Sprintf("failed to retrieve `unknown` value for attribute_id: %d", k))
+			op.logger.Error(ctx, fmt.Sprintf("failed to retrieve `unknown` value for attribute_id: %d", k))
 		}
 	}
 	return res, nil
